@@ -472,15 +472,26 @@ public:
 
     void addValueB(int k) {
         size++;
+
         node *temp = new node();
-        temp->next = head;
-        temp->prev = nullptr;
         temp->val = k;
 
-        if (head != nullptr) {
-            head->prev = temp;
+        if (head == nullptr) {
+            head = temp;
+            tail = temp;
         }
-        head = temp;
+
+        else if(head==tail) {
+
+            temp->next = head;
+            head=temp;
+            tail->prev = head;
+        }
+        else{
+            temp->next = head;
+            head=temp;
+        }
+
     }
 
     //Pass head to delete a List
@@ -501,17 +512,17 @@ public:
     //Adding value to the end of the list
     void addValueE(int k) {
         size++;
-        struct node *temp = new node();
+        node *temp = new node();
         temp->next = nullptr;
-        temp->prev = tail;
         temp->val = k;
+        temp->prev = nullptr;
 
         if (tail != nullptr) {
             tail->next = temp;
+            temp->prev = tail;
         }
         if (head == nullptr) {
             head = temp;
-            tail = temp;
         }
         tail = temp;
     }
@@ -619,20 +630,36 @@ public:
             i--;
             temp = temp->next;
         }
-        node *newNode = new node();
-        newNode->val = val;
-        newNode->prev = temp->prev;
-        newNode->next = temp;
-
-        temp->prev->next = newNode;
-        temp->prev = newNode;
+        if(temp== nullptr)
+            addValueE(val);
+        else if(temp==head){
+            addValueB(val);
+        }
+        else {
+            node *newNode = new node();
+            newNode->val = val;
+            newNode->prev = temp->prev;
+            newNode->next = temp;
+            temp->prev->next = newNode;
+            temp->prev = newNode;
+        }
     }
 
     //add a value 'v'at a random position
     void addRand(int v) {
         int length = 0;
+        size++;
         node *temp;
-        temp = head;
+        if(head!=NULL) {
+            temp = head;
+        }
+        else {
+            node *newNode = new node();
+            newNode->val = v;
+            head=newNode;
+            tail=newNode;
+            return;
+        }
         while (temp != nullptr) {
             length++;
             temp = temp->next;
@@ -658,8 +685,6 @@ public:
 
         temp->prev->next = newNode;
         temp->prev = newNode;
-
-
     }
 
     //Display the values of List in normal and reversed order
@@ -692,18 +717,28 @@ public:
 
     //Deleting a first occurrence of a particular value
     void deleteVal(int v) {
-        node *temp = head;
+        node *temp;
+        if(head!=NULL){
+            temp = head;
+        }
+        else
+            return;
+
         while (temp != nullptr) {
             if (temp->val == v) {
-                if(temp==tail)
-                {tail=tail->prev;
-                tail->next=NULL;
+                if(temp==tail){
+                    deleteTail();
+                } else if(temp==head){
+                    deleteHead();
                 }
                 else {
                     temp->prev->next = temp->next;
                     temp->next->prev = temp->prev;
                 }
                 size--;
+                return;
+            }
+            if(temp==tail){
                 return;
             }
             temp = temp->next;
@@ -735,13 +770,24 @@ public:
     //removing tail from the list
     void deleteTail() {
         size--;
+        if(head==tail){
+            head = nullptr;
+            tail= nullptr;
+            return;
+        }
+        tail->prev->next = NULL;
         tail = tail->prev;
-        tail->next = nullptr;
     }
 
     //removing head
     void deleteHead() {
         size--;
+        if(head ==tail){
+            head = nullptr;
+            tail= nullptr;
+            return;
+        }
+        head->next->prev = NULL;
         head = head->next;
     }
 
@@ -982,6 +1028,7 @@ public:
         }
 
     }
+
 
     void generate(int n) {
         if (n > maxSize) {
